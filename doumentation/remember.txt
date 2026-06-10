@@ -1,0 +1,34 @@
+NEW LEARNINGS
+
+1. TKINTER
+-It is python built in tool for building desktop tools .Its the graphical user interface (GUI).It converts python script into windows,button,menus and text fields.
+-In tkinter, absolutely everything you see on the screen is called a widget.
+-Every basic tkinter application follows the exact same lifecycle. If you miss one of these steps, your window either won't show up, or it will look completely empty.
+
+import tkinter as tk
+
+# Step 1: Create the main window (The Root)
+root = tk.Tk()
+root.title("My First GUI")
+root.geometry("400x200") # Width x Height
+
+# Step 2: Create a widget and place it
+label = tk.Label(root, text="Hello, World!")
+label.pack() # The geometry manager that places it on screen
+
+# Step 3: Start the event loop
+root.mainloop()
+
+2.OS
+-its stand for operating system
+-It is imported to allow to script or interact with computer operating system 
+
+3.Tk
+-It initialise the basix tookit and creates a root blank window thet holds GUI application
+
+4.filedialog
+-This is a sub-module that provides those standard pop-up dialog boxes you see in everyday software—like the "Open File" or "Save As" windows. It allows a user to browse their computer folders and select files or directories graphically.
+
+-root = Tk(): This initializes a Tkinter instance. Normally, this instantly pops up a blank, empty Tkinter GUI window on your desktop.
+
+-root.withdraw(): This immediately hides that blank root window. You do this because you only want the user to see the File Explorer dialog box, not a random, empty gray window sitting in the background.

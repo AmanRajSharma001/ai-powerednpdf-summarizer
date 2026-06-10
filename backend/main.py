@@ -1,11 +1,10 @@
-from fastapi import FastAPI, UploadFile, File
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
-from app.pdf_processor import extract_text_from_bytes
-from app.storage import upload_pdf_to_supabase
+from app.upload import router as upload_router  # Import the upload router
 
 app = FastAPI()
 
+# Global CORS Configuration (Applies to all future modules too)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -17,21 +16,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.post("/upload")
-async def upload_pdf(file: UploadFile = File(...)):
+# Root route to check if the hub server is alive
+@app.get("/")
+def read_root():
+    return {"message": "FastAPI Hub Server is Running"}
 
-    pdf_bytes = await file.read()
-
-    upload_pdf_to_supabase(
-        pdf_bytes,
-        file.filename
-    )
-
-    text = extract_text_from_bytes(pdf_bytes)
-
-    print(text[:500])
-
-    return {
-        "message": "Uploaded to Supabase",
-        "filename": file.filename
-    }
+# REGISTER YOUR MODULES HERE
+app.include_router(upload_router)

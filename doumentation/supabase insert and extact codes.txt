@@ -1,0 +1,32 @@
+https://qzvwnjpugmbjzwvhcjtr.supabase.co/rest/v1/
+
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF6dnduanB1Z21ianp3dmhjanRyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA5MzAxNjYsImV4cCI6MjA5NjUwNjE2Nn0.oZBiAm2QjMmTRnfxa5lMDlUGRtonbp5T0hvesbrapLQ
+
+from supabase import create_client,Client
+url: str="https://qzvwnjpugmbjzwvhcjtr.supabase.co"
+key: str="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF6dnduanB1Z21ianp3dmhjanRyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA5MzAxNjYsImV4cCI6MjA5NjUwNjE2Nn0.oZBiAm2QjMmTRnfxa5lMDlUGRtonbp5T0hvesbrapLQ"
+supabase: Client =create_client(url,key)
+# try:
+#     test=supabase.table("posts").select("id").limit(1).execute()
+#     print("connection successful sample data:",test.data)
+# except Exception as e:
+#     print("connection failed:",e)
+
+#ENTERING DATA INTO THE TABELE
+
+# try:
+#     data={
+#         "title":"my first supabase",
+#         "content":"this is my vey first post using supabase and python!",
+        
+#     }
+#     response=supabase.table("posts").insert(data).execute()
+#     print("Insert successful! New row",response.data)
+# except Exception as e:
+#     print("insert failed")
+
+try:
+    test=supabase.table("posts").select("created_at").limit(1).execute()
+    print("connction successful! sample data:",test.data)
+except Exception as e:
+    print("connection failed:",e)

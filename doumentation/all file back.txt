@@ -1,0 +1,104 @@
+EMBEDDINGS .PY
+import sys
+print(sys.executable)
+from sentence_transformers import SentenceTransformer,util
+model=SentenceTransformer('all-MiniLM-L6-v2')
+
+# # sentences=['this is framework generaes embeddings for each input sentence','Senetences are passed as a list of string.']
+# # embeddings=model.encode(sentences)
+# # for sentence,embedding in zip(sentences,embeddings):
+# #     print("sentence:",sentence)
+# #     print("embedding:",embedding)
+# #     print("")
+
+emb1=model.encode("i am eating apple")
+emb2=model.encode("i am eating apples")
+emb2=model.encode("i am eating appless")
+cos_sim=util.cos_sim(emb1,emb2)
+print("cosine similarity:",cos_sim)
+
+                  
+# import time
+
+# start = time.time()
+
+# from sentence_transformers import SentenceTransformer
+# print("Import:", time.time() - start)
+
+# start = time.time()
+
+# model = SentenceTransformer("all-MiniLM-L6-v2")
+# print("Model Load:", time.time() - start)
+
+# start = time.time()
+
+# print(model.max_seq_length)
+# print("Print:", time.time() - start)
+
+===============================================================================
+PDF_PROCESSOR .PY
+import sys
+import pymupdf
+number_of_files=3
+for i in range(number_of_files):
+    print('hello')
+    
+
+# doc=pymupdf.open('testfile'+str(number_of_pdf)+".pdf"')
+
+out=open()
+=============================================================================
+CLOUDUP.PY
+import os 
+from tkinter import Tk,filedialog
+
+def open_file_explorer():
+    root=Tk()
+    root.withdraw()
+    root.attributes('-topmost',True)
+    selected_file_path=filedialog.askopenfilename(title="Select your PDF to upload to the clout",
+                                                  filetypes=[("PDF files","*.pdf")])
+    if selected_file_path:
+        print(f"Success! You selected:{selected_file_path}")
+        print(f"File Name: {os.path.basename(selected_file_path)}")
+        return selected_file_path
+    else:
+        print("User cancelled orclosed the file explorer.")
+        return None
+pdf_to_upload=open_file_explorer()
+==============================================================================
+MAIN.PY
+# import pymupdf
+
+# doc = pymupdf.open("krish.pdf") # open a document
+# out = open("output.txt", "wb") # create a text output
+# for page in doc: # iterate the document pages
+#     text = page.get_text().encode("utf8") # get plain text (is in UTF-8)
+#     out.write(text) # write text of page
+#     out.write(bytes((12,))) # write page delimiter (form feed 0x0C)
+# out.close()
+
+import pymupdf
+
+doc = pymupdf.open("krish.pdf") # open a document
+
+for page_index in range(len(doc)): # iterate over pdf pages
+    page = doc[page_index] # get the page
+    image_list = page.get_images()
+
+    # print the number of images found on the page
+    if image_list:
+        print(f"Found {len(image_list)} images on page {page_index}")
+    else:
+        print("No images found on page", page_index)
+
+    for image_index, img in enumerate(image_list, start=1): # enumerate the image list
+        xref = img[0] # get the XREF of the image
+        pix = pymupdf.Pixmap(doc, xref) # create a Pixmap
+
+        if pix.n - pix.alpha > 3: # CMYK: convert to RGB first
+            pix = pymupdf.Pixmap(pymupdf.csRGB, pix)
+
+        pix.save(f"page_{page_index}-image_{image_index}.png") # save the image as png
+        pix = None
+==========================================================

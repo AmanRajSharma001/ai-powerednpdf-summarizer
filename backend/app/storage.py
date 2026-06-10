@@ -1,4 +1,4 @@
-import os 
+import os
 from tkinter import Tk, filedialog
 from supabase import create_client, Client
 import io
