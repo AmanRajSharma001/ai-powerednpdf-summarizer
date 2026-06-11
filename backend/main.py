@@ -17,13 +17,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(upload_router)
+app.include_router(retrive_query) 
+
 # Root route to check if the hub server is alive
 @app.get("/")
 def read_root():
     return {"message": "FastAPI Hub Server is Running"}
 
-# REGISTER YOUR MODULES HERE
-app.include_router(upload_router)
-
-#this created by me not sure
-app.include_router(retrive_query)
