@@ -24,4 +24,3 @@ app.include_router(retrive_query)
 @app.get("/")
 def read_root():
     return {"message": "FastAPI Hub Server is Running"}
-

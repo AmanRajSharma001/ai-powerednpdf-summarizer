@@ -29,15 +29,16 @@ def search_faiss(query,k=3):
     query_embedding = np.array(
         query_embedding,
         dtype=np.float32)
-    indices=index.search(query_embedding,k)
+    distances, indices = index.search(query_embedding, k)
 
     with open("chunks.txt","r",encoding="utf-8") as f:
         stored_chunks=f.readlines()
         result=[]
 
         for idx in indices[0]:
-            result.append(
-                stored_chunks[idx].strip()
-            )
+            if idx != -1 and idx < len(stored_chunks):
+                result.append(
+                    stored_chunks[idx].strip()
+                )
         return result
     
