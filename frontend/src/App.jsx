@@ -1,5 +1,6 @@
 import { useState } from "react";
 import "./App.css";
+import Nav_bar from "./components/Nav_bar"
 import SideBar from "./components/SideBar"
 import MainPage from "./components/MainPage"
 function App() {
@@ -74,6 +75,7 @@ function App() {
   return (
     <div className="landing-page">
       <SideBar />
+      <Nav_bar />
       <MainPage />
     </div>
   );
