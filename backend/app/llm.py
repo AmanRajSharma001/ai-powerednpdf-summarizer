@@ -2,7 +2,8 @@ import os
 import requests
 from dotenv import load_dotenv
 
-load_dotenv()
+base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+load_dotenv(os.path.join(base_dir, ".env"))
 
 HF_TOKEN = os.getenv("HF_TOKEN")
 
@@ -18,6 +19,7 @@ def query(payload):
         headers=headers,
         json=payload
     )
+    print(f"DEBUG: Raw HuggingFace Response: Status={response.status_code}, Body={response.text}")
     return response.json()
 
 def generate_answer(query_str: str, chunks: list[str]) -> str:
@@ -30,6 +32,8 @@ Context:
 Question: {query_str}
 
 Answer:"""
+
+    print(f"DEBUG: Prompt sent to LLM:\n{prompt}")
 
     payload = {
         "messages": [
@@ -49,6 +53,7 @@ Answer:"""
             return f"Error: No content generated from Hugging Face API. Response: {response}"
     except Exception as e:
         return f"Error querying Hugging Face API: {str(e)}"
+
 
 if __name__ == "__main__":
     response = query({

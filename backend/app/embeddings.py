@@ -1,4 +1,9 @@
+import os
+from dotenv import load_dotenv
 from sentence_transformers import SentenceTransformer,util
+
+base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+load_dotenv(os.path.join(base_dir, ".env"))
 
 def transforming_sentences(sentences):
     model=SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")

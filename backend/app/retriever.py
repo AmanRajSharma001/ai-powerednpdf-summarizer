@@ -36,19 +36,27 @@ async def retrieve_query(request: QueryRequest):
 
 @router.post("/ask")
 async def ask_question(request: AskRequest):
+    print(f"DEBUG: User Question: {request.question}")
 
-    retrieved_chunks = search_faiss(
-        request.question
-    )
+    # Search and clean empty chunks
+    retrieved_chunks = search_faiss(request.question)
+    retrieved_chunks = [chunk.strip() for chunk in retrieved_chunks if chunk and chunk.strip()]
+
+    print(f"DEBUG: Retrieved Chunks Count: {len(retrieved_chunks)}")
+    for i, chunk in enumerate(retrieved_chunks):
+         print(f"DEBUG: Retrieved Chunk {i+1} Preview: {chunk[:100]}...")
+
+    if not retrieved_chunks:
+        answer = "I could not find that information in the uploaded document."
+        print(f"DEBUG: Final Answer Returned: {answer}")
+        return {"answer": answer}
 
     answer = generate_answer(
         request.question,
         retrieved_chunks
     )
 
-    return {
-        "question": request.question,
-        "retrieved_chunks": retrieved_chunks,
-        "answer": answer
-    }
+    print(f"DEBUG: Final Answer Returned: {answer}")
+    return {"answer": answer}
+
 
