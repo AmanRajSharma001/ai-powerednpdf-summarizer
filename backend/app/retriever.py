@@ -2,7 +2,7 @@ from fastapi import APIRouter
 from pydantic import BaseModel
 
 from app.vector_store import search_faiss
-from app.llm import generate_answer
+from app.llm import generate_answer, FALLBACK_UNAVAILABLE
 
 router = APIRouter()
 
@@ -17,46 +17,31 @@ class AskRequest(BaseModel):
 
 @router.post("/query")
 async def retrieve_query(request: QueryRequest):
-
-    retrieved_chunks = search_faiss(
-        request.query
-    )
-
-    answer = generate_answer(
-        request.query,
-        retrieved_chunks
-    )
-
-    return {
-        "query": request.query,
-        "retrieved_chunks": retrieved_chunks,
-        "answer": answer
-    }
+    """RAG endpoint used by the /query route (kept for compatibility)."""
+    try:
+        retrieved_chunks = search_faiss(request.query)
+        answer = generate_answer(request.query, retrieved_chunks)
+        return {
+            "query": request.query,
+            "retrieved_chunks": retrieved_chunks,
+            "answer": answer,
+        }
+    except Exception:
+        return {"query": request.query, "retrieved_chunks": [], "answer": FALLBACK_UNAVAILABLE}
 
 
 @router.post("/ask")
 async def ask_question(request: AskRequest):
-    print(f"DEBUG: User Question: {request.question}")
+    """Primary chat endpoint called by the frontend."""
+    try:
+        retrieved_chunks = search_faiss(request.question)
+        retrieved_chunks = [c.strip() for c in retrieved_chunks if c and c.strip()]
 
-    # Search and clean empty chunks
-    retrieved_chunks = search_faiss(request.question)
-    retrieved_chunks = [chunk.strip() for chunk in retrieved_chunks if chunk and chunk.strip()]
+        if not retrieved_chunks:
+            return {"answer": "I could not find that information in the uploaded document."}
 
-    print(f"DEBUG: Retrieved Chunks Count: {len(retrieved_chunks)}")
-    for i, chunk in enumerate(retrieved_chunks):
-         print(f"DEBUG: Retrieved Chunk {i+1} Preview: {chunk[:100]}...")
-
-    if not retrieved_chunks:
-        answer = "I could not find that information in the uploaded document."
-        print(f"DEBUG: Final Answer Returned: {answer}")
+        answer = generate_answer(request.question, retrieved_chunks)
         return {"answer": answer}
 
-    answer = generate_answer(
-        request.question,
-        retrieved_chunks
-    )
-
-    print(f"DEBUG: Final Answer Returned: {answer}")
-    return {"answer": answer}
-
-
+    except Exception:
+        return {"answer": FALLBACK_UNAVAILABLE}

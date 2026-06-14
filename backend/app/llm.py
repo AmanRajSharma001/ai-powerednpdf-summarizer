@@ -11,59 +11,75 @@ API_URL = "https://router.huggingface.co/v1/chat/completions"
 
 headers = {
     "Authorization": f"Bearer {HF_TOKEN}",
+    "Content-Type": "application/json",
 }
 
-def query(payload):
+FALLBACK_UNAVAILABLE = "The AI service is currently unavailable. Please try again later."
+FALLBACK_NOT_FOUND   = "I could not find that information in the uploaded document."
+
+
+def _call_hf(payload: dict) -> dict:
+    """Low-level POST to HuggingFace router; raises on non-200."""
     response = requests.post(
         API_URL,
         headers=headers,
-        json=payload
+        json=payload,
+        timeout=30,
     )
-    print(f"DEBUG: Raw HuggingFace Response: Status={response.status_code}, Body={response.text}")
+    response.raise_for_status()
     return response.json()
 
-def generate_answer(query_str: str, chunks: list[str]) -> str:
+
+def generate_answer(query_str: str, chunks: list) -> str:
+    """
+    Build a RAG prompt from retrieved chunks and query the LLM.
+
+    Returns a clean string answer. Never raises — all errors result in
+    a user-friendly fallback message.
+    """
+    if not chunks:
+        return FALLBACK_NOT_FOUND
+
     context = "\n\n".join(chunks)
-    prompt = f"""Use the following context to answer the question. If you do not know the answer or if the context does not contain the answer, say "I cannot find the answer in the provided document."
 
-Context:
-{context}
-
-Question: {query_str}
-
-Answer:"""
-
-    print(f"DEBUG: Prompt sent to LLM:\n{prompt}")
+    prompt = (
+        "You are a helpful assistant. Use only the context below to answer "
+        "the question. If the answer is not contained in the context, say "
+        "\"I could not find that information in the uploaded document.\"\n\n"
+        f"Context:\n{context}\n\n"
+        f"Question: {query_str}\n\n"
+        "Answer:"
+    )
 
     payload = {
-        "messages": [
-            {
-                "role": "user",
-                "content": prompt
-            }
-        ],
-        "model": "Qwen/Qwen2.5-0.5B-Instruct:featherless-ai"
+        "messages": [{"role": "user", "content": prompt}],
+        "model": "Qwen/Qwen2.5-0.5B-Instruct:featherless-ai",
+        "max_tokens": 512,
     }
 
     try:
-        response = query(payload)
-        if "choices" in response and len(response["choices"]) > 0:
-            return response["choices"][0]["message"]["content"]
-        else:
-            return f"Error: No content generated from Hugging Face API. Response: {response}"
-    except Exception as e:
-        return f"Error querying Hugging Face API: {str(e)}"
+        data = _call_hf(payload)
+
+        choices = data.get("choices") or []
+        if not choices:
+            return FALLBACK_UNAVAILABLE
+
+        content = choices[0].get("message", {}).get("content", "").strip()
+        return content if content else FALLBACK_UNAVAILABLE
+
+    except requests.exceptions.Timeout:
+        return FALLBACK_UNAVAILABLE
+
+    except requests.exceptions.HTTPError as exc:
+        status = exc.response.status_code if exc.response is not None else 0
+        if status in (503, 429):
+            return FALLBACK_UNAVAILABLE
+        return FALLBACK_UNAVAILABLE
+
+    except Exception:
+        return FALLBACK_UNAVAILABLE
 
 
 if __name__ == "__main__":
-    response = query({
-        "messages": [
-            {
-                "role": "user",
-                "content": "What is the capital of France?"
-            }
-        ],
-        "model": "Qwen/Qwen2.5-0.5B-Instruct:featherless-ai"
-    })
-
-    print(response["choices"][0]["message"]["content"])
+    ans = generate_answer("What is the capital of France?", ["France is a country in Europe. Paris is its capital."])
+    print(ans)
